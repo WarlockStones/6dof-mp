@@ -179,7 +179,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxSpeed: 0.5
   acceleration: 0.01
-  rotationSpeed: 0.25
+  rotationSpeed: 0.1
+  maxRotationSpeed: 1.2
 --- !u!54 &4463552674501364475
 Rigidbody:
   m_ObjectHideFlags: 0

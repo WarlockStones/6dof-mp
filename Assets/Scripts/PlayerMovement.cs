@@ -8,13 +8,12 @@ public class PlayerMovement : NetworkBehaviour
     IAC_Default inputActions;
     NetworkVariable<float> pitch, roll, yaw, surge, heave, sway;
     Rigidbody rb;
-    bool inputsEnabled = false;
-
 
     [SerializeField] private float maxSpeed = 0.5f;
-    private float maxHeave = 0.3f;
+    [SerializeField] private float maxHeave = 0.3f;
     [SerializeField] private float acceleration = 0.01f;
-    [SerializeField] private float rotationSpeed = 0.25f;
+    [SerializeField] private float rotationSpeed = 0.1f;
+    [SerializeField] private float maxRotationSpeed = 1.2f;
 
     PlayerMovement()
     {
@@ -52,44 +51,35 @@ public class PlayerMovement : NetworkBehaviour
             // Debug.Log($"Pitch: {Pitch.Value}, Roll: {Roll.Value}, Yaw: {Yaw.Value}, Surge: {Surge.Value}, Heave: {Heave.Value}, Sway: {Sway.Value}");
             // Clamp inputs and document sus behaviour. Clamp would only work if not multithreaded. Otherwise you could change it when it is adding force suddenly Surge.Value becomes 300!
             currentSurge = UpdateSpeedValue(currentSurge, surge.Value, acceleration, maxSpeed);
+            currentSway  = UpdateSpeedValue(currentSway,  sway.Value,  acceleration, maxSpeed);
+            currentHeave = UpdateSpeedValue(currentHeave, heave.Value, acceleration, maxHeave);
             transform.position += transform.forward * currentSurge;
-
-            currentSway = UpdateSpeedValue(currentSway, sway.Value, acceleration, maxSpeed);
-            transform.position += transform.right * currentSway;
-
-            curretHeave = UpdateSpeedValue(curretHeave, heave.Value, acceleration, maxHeave); // This way I can modify without brining in more variables
-            transform.position += transform.up * curretHeave;
+            transform.position += transform.right   * currentSway;
+            transform.position += transform.up      * currentHeave;
 
             // ROTATION
-            // Start with pitch then try other things
-            /*
-            rb.AddTorque(transform.forward * Roll.Value  * Torque);
-            rb.AddTorque(transform.right   * Pitch.Value * Torque);
-            rb.AddTorque(transform.up      * Yaw.Value   * Torque);
-           
-            rb.AddForce(transform.forward * Surge.Value * Acceleration);
-            rb.AddForce(transform.right   * Sway.Value  * Acceleration);
-            rb.AddForce(transform.up      * Heave.Value * Acceleration);
-            */
+            currentPitchSpeed = UpdateSpeedValue(currentPitchSpeed, pitch.Value, rotationSpeed, maxRotationSpeed);
+            currentYawSpeed   = UpdateSpeedValue(currentYawSpeed,   yaw.Value,   rotationSpeed, maxRotationSpeed);
+            currentRollSpeed  = UpdateSpeedValue(currentRollSpeed,  roll.Value,  rotationSpeed, maxRotationSpeed);
+            transform.Rotate(currentPitchSpeed, currentYawSpeed, currentRollSpeed * -1);
         }
     }
 
-    private float currentSurge, curretHeave, currentSway;
+    private float currentSurge, currentHeave, currentSway, currentYawSpeed, currentPitchSpeed, currentRollSpeed;
     // Accelerate and deaccelerate for Surge, Heave, Sway
-    static float UpdateSpeedValue(float inCurrentSpeed, float inputValue, float inAcceleration, float inMaxSpeed)
+    static float UpdateSpeedValue(float inSpeed, float inputValue, float inAccleration, float maxSpeed)
     {
-        float speed = inCurrentSpeed;
-        // targetSurge = surge.Value * maxSpeed;
-        float targetSpeed = inputValue * inMaxSpeed;
+        float speed = inSpeed;
+        float targetSpeed = inputValue * maxSpeed;
         if (speed < targetSpeed)
         {
-            speed += inAcceleration;
-            Mathf.Clamp(speed, inCurrentSpeed, targetSpeed);
+            speed += inAccleration;
+            Mathf.Clamp(speed, inSpeed, targetSpeed);
         }
-        else if (inCurrentSpeed > targetSpeed)
+        else if (inSpeed > targetSpeed)
         {
-            speed -= inAcceleration;
-            Mathf.Clamp(speed, targetSpeed, inCurrentSpeed);
+            speed -= inAccleration;
+            Mathf.Clamp(speed, targetSpeed, inSpeed);
         }
         if (targetSpeed == 0)
         {
