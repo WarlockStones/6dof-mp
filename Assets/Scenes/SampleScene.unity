@@ -461,6 +461,14 @@ PrefabInstance:
       propertyPath: GlobalObjectIdHash
       value: 2735160439
       objectReference: {fileID: 0}
+    - target: {fileID: 4754249128343744009, guid: bfb57e125fb2f994eb552c34cd857173, type: 3}
+      propertyPath: Torque
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4754249128343744009, guid: bfb57e125fb2f994eb552c34cd857173, type: 3}
+      propertyPath: Acceleration
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 6713398771915019940, guid: bfb57e125fb2f994eb552c34cd857173, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0

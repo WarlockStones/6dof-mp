@@ -176,7 +176,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5948af3b1ca66654e8dc256a7b599bc3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Acceleration: 50
+  Acceleration: 5
+  Torque: 0.2
 --- !u!54 &2835853172152886256
 Rigidbody:
   m_ObjectHideFlags: 0
