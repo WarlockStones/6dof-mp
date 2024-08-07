@@ -1,64 +1,68 @@
+using System.Transactions;
 using Unity.Netcode;
+using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
-using UnityEngine.InputSystem;
-
-/* TODO:
- * - Server must handle the NetworkVariables and update Owner
- * 
- */
 
 public class PlayerMovement : NetworkBehaviour
 {
-    IAC_Default InputActions;
-    NetworkVariable<float> Pitch, Roll, Yaw, Surge, Heave, Sway;
+    IAC_Default inputActions;
+    NetworkVariable<float> pitch, roll, yaw, surge, heave, sway;
     Rigidbody rb;
-    bool InputsEnabled = false;
+    bool inputsEnabled = false;
 
-    [SerializeField] private float Acceleration = 50;
-    [SerializeField] private float Torque = 20;
+
+    [SerializeField] private float maxSpeed = 0.5f;
+    private float maxHeave = 0.3f;
+    [SerializeField] private float acceleration = 0.01f;
+    [SerializeField] private float rotationSpeed = 0.25f;
 
     PlayerMovement()
     {
-        Pitch = new NetworkVariable<float>(writePerm: NetworkVariableWritePermission.Owner);
-        Roll  = new NetworkVariable<float>(writePerm: NetworkVariableWritePermission.Owner);
-        Yaw   = new NetworkVariable<float>(writePerm: NetworkVariableWritePermission.Owner);
-        Surge = new NetworkVariable<float>(writePerm: NetworkVariableWritePermission.Owner);
-        Heave = new NetworkVariable<float>(writePerm: NetworkVariableWritePermission.Owner);
-        Sway  = new NetworkVariable<float>(writePerm: NetworkVariableWritePermission.Owner);
+        pitch = new NetworkVariable<float>(writePerm: NetworkVariableWritePermission.Owner);
+        roll  = new NetworkVariable<float>(writePerm: NetworkVariableWritePermission.Owner);
+        yaw   = new NetworkVariable<float>(writePerm: NetworkVariableWritePermission.Owner);
+        surge = new NetworkVariable<float>(writePerm: NetworkVariableWritePermission.Owner);
+        heave = new NetworkVariable<float>(writePerm: NetworkVariableWritePermission.Owner);
+        sway  = new NetworkVariable<float>(writePerm: NetworkVariableWritePermission.Owner);
     }
 
     void Start()
     {
         if (IsLocalPlayer)
         {
-            InputActions = new IAC_Default();
-            InputActions.Gameplay.Enable();
-            InputsEnabled = true; // TODO: Needed?
+            inputActions = new IAC_Default();
+            inputActions.Gameplay.Enable();
         }
-
-        rb = GetComponent<Rigidbody>();
     }
 
     void FixedUpdate()
     {
-        if (IsLocalPlayer && InputsEnabled)
+        if (IsLocalPlayer)
         {
-
-             Pitch.Value = InputActions.Gameplay.Pitch.ReadValue<float>();
-             Roll.Value  = InputActions.Gameplay.Roll .ReadValue<float>();
-             Yaw.Value   = InputActions.Gameplay.Yaw  .ReadValue<float>();
-             Surge.Value = InputActions.Gameplay.Surge.ReadValue<float>();
-             Heave.Value = InputActions.Gameplay.Heave.ReadValue<float>();
-             Sway.Value  = InputActions.Gameplay.Sway .ReadValue<float>();
-            //.. etc
+             pitch.Value = inputActions.Gameplay.Pitch.ReadValue<float>();
+             roll.Value  = inputActions.Gameplay.Roll .ReadValue<float>();
+             yaw.Value   = inputActions.Gameplay.Yaw  .ReadValue<float>();
+             surge.Value = inputActions.Gameplay.Surge.ReadValue<float>();
+             heave.Value = inputActions.Gameplay.Heave.ReadValue<float>();
+             sway.Value  = inputActions.Gameplay.Sway .ReadValue<float>();
         }
 
         if (IsServer)
         {
-            Debug.Log($"Pitch: {Pitch.Value}, Roll: {Roll.Value}, Yaw: {Yaw.Value}, Surge: {Surge.Value}, Heave: {Heave.Value}, Sway: {Sway.Value}");
+            // Debug.Log($"Pitch: {Pitch.Value}, Roll: {Roll.Value}, Yaw: {Yaw.Value}, Surge: {Surge.Value}, Heave: {Heave.Value}, Sway: {Sway.Value}");
             // Clamp inputs and document sus behaviour. Clamp would only work if not multithreaded. Otherwise you could change it when it is adding force suddenly Surge.Value becomes 300!
+            currentSurge = UpdateSpeedValue(currentSurge, surge.Value, acceleration, maxSpeed);
+            transform.position += transform.forward * currentSurge;
 
-            // Rotation
+            currentSway = UpdateSpeedValue(currentSway, sway.Value, acceleration, maxSpeed);
+            transform.position += transform.right * currentSway;
+
+            curretHeave = UpdateSpeedValue(curretHeave, heave.Value, acceleration, maxHeave); // This way I can modify without brining in more variables
+            transform.position += transform.up * curretHeave;
+
+            // ROTATION
+            // Start with pitch then try other things
+            /*
             rb.AddTorque(transform.forward * Roll.Value  * Torque);
             rb.AddTorque(transform.right   * Pitch.Value * Torque);
             rb.AddTorque(transform.up      * Yaw.Value   * Torque);
@@ -66,6 +70,35 @@ public class PlayerMovement : NetworkBehaviour
             rb.AddForce(transform.forward * Surge.Value * Acceleration);
             rb.AddForce(transform.right   * Sway.Value  * Acceleration);
             rb.AddForce(transform.up      * Heave.Value * Acceleration);
+            */
         }
+    }
+
+    private float currentSurge, curretHeave, currentSway;
+    // Accelerate and deaccelerate for Surge, Heave, Sway
+    static float UpdateSpeedValue(float inCurrentSpeed, float inputValue, float inAcceleration, float inMaxSpeed)
+    {
+        float speed = inCurrentSpeed;
+        // targetSurge = surge.Value * maxSpeed;
+        float targetSpeed = inputValue * inMaxSpeed;
+        if (speed < targetSpeed)
+        {
+            speed += inAcceleration;
+            Mathf.Clamp(speed, inCurrentSpeed, targetSpeed);
+        }
+        else if (inCurrentSpeed > targetSpeed)
+        {
+            speed -= inAcceleration;
+            Mathf.Clamp(speed, targetSpeed, inCurrentSpeed);
+        }
+        if (targetSpeed == 0)
+        {
+            if (speed < 0.01f && speed > -0.01f)
+            {
+                speed = 0;
+            }
+        }
+        
+        return speed;
     }
 }
