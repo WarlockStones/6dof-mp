@@ -2,7 +2,7 @@
     "name": "IAC_Default",
     "maps": [
         {
-            "name": "Player",
+            "name": "Gameplay",
             "id": "6de85a39-46f3-4e04-9ec2-1c7f76c008de",
             "actions": [
                 {

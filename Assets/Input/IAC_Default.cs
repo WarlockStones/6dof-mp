@@ -24,7 +24,7 @@ public partial class @IAC_Default: IInputActionCollection2, IDisposable
     ""name"": ""IAC_Default"",
     ""maps"": [
         {
-            ""name"": ""Player"",
+            ""name"": ""Gameplay"",
             ""id"": ""6de85a39-46f3-4e04-9ec2-1c7f76c008de"",
             ""actions"": [
                 {
@@ -292,14 +292,14 @@ public partial class @IAC_Default: IInputActionCollection2, IDisposable
         }
     ]
 }");
-        // Player
-        m_Player = asset.FindActionMap("Player", throwIfNotFound: true);
-        m_Player_Pitch = m_Player.FindAction("Pitch", throwIfNotFound: true);
-        m_Player_Roll = m_Player.FindAction("Roll", throwIfNotFound: true);
-        m_Player_Yaw = m_Player.FindAction("Yaw", throwIfNotFound: true);
-        m_Player_Surge = m_Player.FindAction("Surge", throwIfNotFound: true);
-        m_Player_Heave = m_Player.FindAction("Heave", throwIfNotFound: true);
-        m_Player_Sway = m_Player.FindAction("Sway", throwIfNotFound: true);
+        // Gameplay
+        m_Gameplay = asset.FindActionMap("Gameplay", throwIfNotFound: true);
+        m_Gameplay_Pitch = m_Gameplay.FindAction("Pitch", throwIfNotFound: true);
+        m_Gameplay_Roll = m_Gameplay.FindAction("Roll", throwIfNotFound: true);
+        m_Gameplay_Yaw = m_Gameplay.FindAction("Yaw", throwIfNotFound: true);
+        m_Gameplay_Surge = m_Gameplay.FindAction("Surge", throwIfNotFound: true);
+        m_Gameplay_Heave = m_Gameplay.FindAction("Heave", throwIfNotFound: true);
+        m_Gameplay_Sway = m_Gameplay.FindAction("Sway", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -358,34 +358,34 @@ public partial class @IAC_Default: IInputActionCollection2, IDisposable
         return asset.FindBinding(bindingMask, out action);
     }
 
-    // Player
-    private readonly InputActionMap m_Player;
-    private List<IPlayerActions> m_PlayerActionsCallbackInterfaces = new List<IPlayerActions>();
-    private readonly InputAction m_Player_Pitch;
-    private readonly InputAction m_Player_Roll;
-    private readonly InputAction m_Player_Yaw;
-    private readonly InputAction m_Player_Surge;
-    private readonly InputAction m_Player_Heave;
-    private readonly InputAction m_Player_Sway;
-    public struct PlayerActions
+    // Gameplay
+    private readonly InputActionMap m_Gameplay;
+    private List<IGameplayActions> m_GameplayActionsCallbackInterfaces = new List<IGameplayActions>();
+    private readonly InputAction m_Gameplay_Pitch;
+    private readonly InputAction m_Gameplay_Roll;
+    private readonly InputAction m_Gameplay_Yaw;
+    private readonly InputAction m_Gameplay_Surge;
+    private readonly InputAction m_Gameplay_Heave;
+    private readonly InputAction m_Gameplay_Sway;
+    public struct GameplayActions
     {
         private @IAC_Default m_Wrapper;
-        public PlayerActions(@IAC_Default wrapper) { m_Wrapper = wrapper; }
-        public InputAction @Pitch => m_Wrapper.m_Player_Pitch;
-        public InputAction @Roll => m_Wrapper.m_Player_Roll;
-        public InputAction @Yaw => m_Wrapper.m_Player_Yaw;
-        public InputAction @Surge => m_Wrapper.m_Player_Surge;
-        public InputAction @Heave => m_Wrapper.m_Player_Heave;
-        public InputAction @Sway => m_Wrapper.m_Player_Sway;
-        public InputActionMap Get() { return m_Wrapper.m_Player; }
+        public GameplayActions(@IAC_Default wrapper) { m_Wrapper = wrapper; }
+        public InputAction @Pitch => m_Wrapper.m_Gameplay_Pitch;
+        public InputAction @Roll => m_Wrapper.m_Gameplay_Roll;
+        public InputAction @Yaw => m_Wrapper.m_Gameplay_Yaw;
+        public InputAction @Surge => m_Wrapper.m_Gameplay_Surge;
+        public InputAction @Heave => m_Wrapper.m_Gameplay_Heave;
+        public InputAction @Sway => m_Wrapper.m_Gameplay_Sway;
+        public InputActionMap Get() { return m_Wrapper.m_Gameplay; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
         public bool enabled => Get().enabled;
-        public static implicit operator InputActionMap(PlayerActions set) { return set.Get(); }
-        public void AddCallbacks(IPlayerActions instance)
+        public static implicit operator InputActionMap(GameplayActions set) { return set.Get(); }
+        public void AddCallbacks(IGameplayActions instance)
         {
-            if (instance == null || m_Wrapper.m_PlayerActionsCallbackInterfaces.Contains(instance)) return;
-            m_Wrapper.m_PlayerActionsCallbackInterfaces.Add(instance);
+            if (instance == null || m_Wrapper.m_GameplayActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_GameplayActionsCallbackInterfaces.Add(instance);
             @Pitch.started += instance.OnPitch;
             @Pitch.performed += instance.OnPitch;
             @Pitch.canceled += instance.OnPitch;
@@ -406,7 +406,7 @@ public partial class @IAC_Default: IInputActionCollection2, IDisposable
             @Sway.canceled += instance.OnSway;
         }
 
-        private void UnregisterCallbacks(IPlayerActions instance)
+        private void UnregisterCallbacks(IGameplayActions instance)
         {
             @Pitch.started -= instance.OnPitch;
             @Pitch.performed -= instance.OnPitch;
@@ -428,21 +428,21 @@ public partial class @IAC_Default: IInputActionCollection2, IDisposable
             @Sway.canceled -= instance.OnSway;
         }
 
-        public void RemoveCallbacks(IPlayerActions instance)
+        public void RemoveCallbacks(IGameplayActions instance)
         {
-            if (m_Wrapper.m_PlayerActionsCallbackInterfaces.Remove(instance))
+            if (m_Wrapper.m_GameplayActionsCallbackInterfaces.Remove(instance))
                 UnregisterCallbacks(instance);
         }
 
-        public void SetCallbacks(IPlayerActions instance)
+        public void SetCallbacks(IGameplayActions instance)
         {
-            foreach (var item in m_Wrapper.m_PlayerActionsCallbackInterfaces)
+            foreach (var item in m_Wrapper.m_GameplayActionsCallbackInterfaces)
                 UnregisterCallbacks(item);
-            m_Wrapper.m_PlayerActionsCallbackInterfaces.Clear();
+            m_Wrapper.m_GameplayActionsCallbackInterfaces.Clear();
             AddCallbacks(instance);
         }
     }
-    public PlayerActions @Player => new PlayerActions(this);
+    public GameplayActions @Gameplay => new GameplayActions(this);
     private int m_DefaultSchemeIndex = -1;
     public InputControlScheme DefaultScheme
     {
@@ -452,7 +452,7 @@ public partial class @IAC_Default: IInputActionCollection2, IDisposable
             return asset.controlSchemes[m_DefaultSchemeIndex];
         }
     }
-    public interface IPlayerActions
+    public interface IGameplayActions
     {
         void OnPitch(InputAction.CallbackContext context);
         void OnRoll(InputAction.CallbackContext context);
