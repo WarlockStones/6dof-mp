@@ -7,6 +7,7 @@ public class PlayerCamera : NetworkBehaviour
     {
         if (!IsLocalPlayer)
         {
+            Debug.Log(OwnerClientId + " is local player? " + IsLocalPlayer);
             GetComponent<Camera>().enabled = false;
         }
     }

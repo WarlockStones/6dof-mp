@@ -1,14 +1,18 @@
-using System.Transactions;
+using System;
+using System.Collections;
 using Unity.Netcode;
 using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
 
+
 public class PlayerMovement : NetworkBehaviour
 {
-    IAC_Default inputActions;
+    // Change to bitset?
     NetworkVariable<float> pitch, roll, yaw, surge, heave, sway;
-    Rigidbody rb;
 
+    IAC_Default inputActions;
+    Rigidbody rb;
+    
     [SerializeField] private float maxSpeed = 0.5f;
     [SerializeField] private float maxHeave = 0.3f;
     [SerializeField] private float acceleration = 0.01f;
@@ -27,29 +31,34 @@ public class PlayerMovement : NetworkBehaviour
 
     void Start()
     {
+        Debug.Log("Player spawned: "+OwnerClientId);
         if (IsLocalPlayer)
         {
+            Debug.Log("Is local player");
             inputActions = new IAC_Default();
             inputActions.Gameplay.Enable();
         }
+        else
+            Debug.Log("Not local player");
     }
 
     void FixedUpdate()
     {
         if (IsLocalPlayer)
         {
-             pitch.Value = inputActions.Gameplay.Pitch.ReadValue<float>();
-             roll.Value  = inputActions.Gameplay.Roll .ReadValue<float>();
-             yaw.Value   = inputActions.Gameplay.Yaw  .ReadValue<float>();
-             surge.Value = inputActions.Gameplay.Surge.ReadValue<float>();
-             heave.Value = inputActions.Gameplay.Heave.ReadValue<float>();
-             sway.Value  = inputActions.Gameplay.Sway .ReadValue<float>();
+            pitch.Value = inputActions.Gameplay.Pitch.ReadValue<float>();
+            roll.Value  = inputActions.Gameplay.Roll .ReadValue<float>();
+            yaw.Value   = inputActions.Gameplay.Yaw  .ReadValue<float>();
+            surge.Value = inputActions.Gameplay.Surge.ReadValue<float>();
+            heave.Value = inputActions.Gameplay.Heave.ReadValue<float>();
+            sway.Value  = inputActions.Gameplay.Sway .ReadValue<float>();
         }
 
+        // TODO: Remove the use of NetworkTransform on client?
         if (IsServer)
         {
-            // Debug.Log($"Pitch: {Pitch.Value}, Roll: {Roll.Value}, Yaw: {Yaw.Value}, Surge: {Surge.Value}, Heave: {Heave.Value}, Sway: {Sway.Value}");
-            // Clamp inputs and document sus behaviour. Clamp would only work if not multithreaded. Otherwise you could change it when it is adding force suddenly Surge.Value becomes 300!
+            // TODO: Clamp input value. It is currently client authorative
+
             currentSurge = UpdateSpeedValue(currentSurge, surge.Value, acceleration, maxSpeed);
             currentSway  = UpdateSpeedValue(currentSway,  sway.Value,  acceleration, maxSpeed);
             currentHeave = UpdateSpeedValue(currentHeave, heave.Value, acceleration, maxHeave);
@@ -57,7 +66,6 @@ public class PlayerMovement : NetworkBehaviour
             transform.position += transform.right   * currentSway;
             transform.position += transform.up      * currentHeave;
 
-            // ROTATION
             currentPitchSpeed = UpdateSpeedValue(currentPitchSpeed, pitch.Value, rotationSpeed, maxRotationSpeed);
             currentYawSpeed   = UpdateSpeedValue(currentYawSpeed,   yaw.Value,   rotationSpeed, maxRotationSpeed);
             currentRollSpeed  = UpdateSpeedValue(currentRollSpeed,  roll.Value,  rotationSpeed, maxRotationSpeed);
@@ -66,7 +74,6 @@ public class PlayerMovement : NetworkBehaviour
     }
 
     private float currentSurge, currentHeave, currentSway, currentYawSpeed, currentPitchSpeed, currentRollSpeed;
-    // Accelerate and deaccelerate for Surge, Heave, Sway
     static float UpdateSpeedValue(float inSpeed, float inputValue, float inAccleration, float maxSpeed)
     {
         float speed = inSpeed;
