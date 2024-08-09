@@ -8,7 +8,7 @@ using UnityEngine;
 public class PlayerMovement : NetworkBehaviour
 {
     IAC_Default inputActions;
-    
+
     [SerializeField] private float maxSpeed = 0.5f;
     [SerializeField] private float maxHeave = 0.3f;
     [SerializeField] private float acceleration = 0.01f;
@@ -16,15 +16,27 @@ public class PlayerMovement : NetworkBehaviour
     [SerializeField] private float maxRotationSpeed = 1.2f;
 
     // 16bits to store all input values
-    NetworkVariable<ushort> inputBits = new NetworkVariable<ushort>(writePerm: NetworkVariableWritePermission.Owner); 
+    NetworkVariable<ushort> inputBits = new NetworkVariable<ushort>(writePerm: NetworkVariableWritePermission.Owner);
 
 
-    struct InputValue
+    struct InputValue // TODO: Rename to something better now that I reuse it for movement values too
     {
         public float value;
         public InputTypes type;
     }
     InputValue[] inputValues = new InputValue[6];
+
+    InputValue[] currentMovementValues = new InputValue[6];
+
+    /*
+     * MovementValues
+     *      float currentMovement
+     *      InputTypes type
+     * So that I can toss the whole array into a function and get what I want.
+     * Update Speed Values
+     * Return Vector3 NewPosition. Vec3 NewRotation
+     * 
+     */
 
     PlayerMovement()
     {
@@ -34,6 +46,8 @@ public class PlayerMovement : NetworkBehaviour
         inputValues[(int)InputTypes.Sway] .type = InputTypes.Sway;
         inputValues[(int)InputTypes.Heave].type = InputTypes.Heave;
         inputValues[(int)InputTypes.Surge].type = InputTypes.Surge;
+
+        currentMovementValues = inputValues; // Copy
     }
 
     void Start()
@@ -57,45 +71,54 @@ public class PlayerMovement : NetworkBehaviour
             inputValues[(int)InputTypes.Surge].value = inputActions.Gameplay.Surge.ReadValue<float>();
 
             inputBits.Value = UpdateInputBits(inputBits.Value, inputValues);
-            Debug.Log("inputBits: " + Convert.ToString(inputBits.Value, 2));
+            // Debug.Log("inputBits: " + Convert.ToString(inputBits.Value, 2));
 
             // result is inputBits of only the surgeBits moved to the rightmost position
-            var s = inputValues[(int)InputTypes.Surge];
-            Debug.Log("Final surgeBits: " + GetInputBits(inputBits.Value, InputTypes.Surge)); // 0b01 = 1, 0b11 = 3.
+            // Debug.Log("Final input values: " + DecodeInputBits(GetInputBits(inputBits.Value, InputTypes.Surge))); 
         }
 
         // TODO: Remove the use of NetworkTransform on client?
         if (IsServer)
         {
-            /*
-            int surgeInput = DecodeInputBits(DecodeInputValue(inputBits.Value, InputBits.surgePos, InputBits.surgeSwitch));
-            currentSurge = UpdateSpeedValue(currentSurge, surgeInput, acceleration, maxSpeed);
-            transform.position += transform.forward * currentSurge;
-            //.... I can not just continue do these 3 steps that is super messy
-            */ 
-
+            // Decode and update the input values from the inputBits we recieved from the client
             for (int i = 0; i < inputValues.Length; i++)
             {
                 var v = inputValues[i];
                 v.value = DecodeInputBits(GetInputBits(inputBits.Value, v.type));
             }
 
-            // TODO: Make this cleaner
-            currentSurge = UpdateSpeedValue(currentSurge, inputValues[(int)InputTypes.Surge].value, acceleration, maxSpeed);
-            currentSway  = UpdateSpeedValue(currentSway,  inputValues[(int)InputTypes.Sway] .value, acceleration, maxSpeed);
-            currentHeave = UpdateSpeedValue(currentHeave, inputValues[(int)InputTypes.Heave].value, acceleration, maxHeave);
-            transform.position += transform.forward * currentSurge;
-            transform.position += transform.right   * currentSway;
-            transform.position += transform.up      * currentHeave;
+            transform.position += GetAmountToMove(currentMovementValues, inputValues);
 
+            /*
             currentPitchSpeed = UpdateSpeedValue(currentPitchSpeed, inputValues[(int)InputTypes.Pitch].value, rotationSpeed, maxRotationSpeed);
             currentYawSpeed   = UpdateSpeedValue(currentYawSpeed,   inputValues[(int)InputTypes.Yaw]  .value, rotationSpeed, maxRotationSpeed);
             currentRollSpeed  = UpdateSpeedValue(currentRollSpeed,  inputValues[(int)InputTypes.Roll] .value, rotationSpeed, maxRotationSpeed);
             transform.Rotate(currentPitchSpeed, currentYawSpeed, currentRollSpeed * -1);
+            */
         }
     }
 
-    private float currentSurge, currentHeave, currentSway, currentYawSpeed, currentPitchSpeed, currentRollSpeed;
+    // BUG: There is no acceleration!
+    Vector3 GetAmountToMove(InputValue[] movementValues, InputValue[] inputValues)
+    {
+        for (int i = 0; i < movementValues.Length; i++)
+        {
+            var m = movementValues[i];
+            if (m.type == InputTypes.Sway || m.type == InputTypes.Heave ||m.type == InputTypes.Surge)
+            {
+                m.value = UpdateSpeedValue(m.value, inputValues[(int)m.type].value, acceleration, maxSpeed);
+            }
+        }
+
+        Vector3 NewMovement = new Vector3();
+        NewMovement += Vector3.right   * movementValues[(int)InputTypes.Sway] .value;
+        NewMovement += Vector3.forward * movementValues[(int)InputTypes.Surge].value;
+        NewMovement += Vector3.up      * movementValues[(int)InputTypes.Heave].value;
+        return NewMovement;
+    }
+
+
+
     static float UpdateSpeedValue(float inSpeed, float inputValue, float inAccleration, float maxSpeed)
     {
         float speed = inSpeed;
@@ -112,7 +135,7 @@ public class PlayerMovement : NetworkBehaviour
         }
         if (targetSpeed == 0)
         {
-            if (speed < 0.01f && speed > -0.01f)
+            if (speed < 0.01f && speed > -0.01f) // Do not move if float is almost zero
             {
                 speed = 0;
             }
@@ -127,7 +150,7 @@ public class PlayerMovement : NetworkBehaviour
         byte b;
         foreach (var v in InputBitValues)
         {
-            b = InputBits.nill;
+            b = InputBits.nil;
             if (v.value > 0)
                 b = InputBits.positive;
             else if (v.value < 0)
@@ -138,10 +161,11 @@ public class PlayerMovement : NetworkBehaviour
         return (ushort)bitSet; 
     }
 
+    /*
     static ushort UpdateInputBits(ushort inInputBits, float inputValue, int bitPosition, int bitShift)
     {
         int bitSet = inInputBits;
-        byte b = InputBits.nill;
+        byte b = InputBits.nil;
         if (inputValue > 0)
             b = InputBits.positive;
         else if (inputValue < 0)
@@ -151,6 +175,7 @@ public class PlayerMovement : NetworkBehaviour
 
         return (ushort)bitSet;
     }
+    */
 
     // Returns the two bits for that specific input position
     static byte GetInputBits(int inputBits, InputTypes type)
