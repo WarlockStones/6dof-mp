@@ -1,17 +1,12 @@
+using Mono.Cecil;
 using System;
-using System.Collections;
 using Unity.Netcode;
-using Unity.Networking.Transport.Error;
-using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 
 
 public class PlayerMovement : NetworkBehaviour
 {
-    // Change to bitset?
-
     IAC_Default inputActions;
     
     [SerializeField] private float maxSpeed = 0.5f;
@@ -20,55 +15,25 @@ public class PlayerMovement : NetworkBehaviour
     [SerializeField] private float rotationSpeed = 0.1f;
     [SerializeField] private float maxRotationSpeed = 1.2f;
 
-    private ushort inputBits; // 16 bits to store the input values
-    const int positiveInput  = 0b01; // Key is pressed
-    const int negativeInput  = 0b11; // Key reverse is pressed
-    const int noInput = 0b00; // Key is not pressed
+    // 16bits to store all input values
+    NetworkVariable<ushort> inputBits = new NetworkVariable<ushort>(writePerm: NetworkVariableWritePermission.Owner); 
 
-    const int pitchBits = 0b0000000000000011;
-    const int rollBits  = 0b0000000000001100;
-    const int yawBits   = 0b0000000000110000;
-    const int surgeBits = 0b0000000011000000;
-    const int heaveBits = 0b0000001100000000;
-    const int swayBits  = 0b0000110000000000;
 
-    const int pitchSwitch = 0;
-    const int rollSwitch  = 2;
-    const int yawSwitch   = 4;
-    const int surgeSwitch = 6;
-    const int heaveSwitch = 8;
-    const int swaySwitch  = 10;
-
-    struct InputBitValues
+    struct InputValue
     {
-        public float inputValue;
-        public int bitPosition;
-        public int bitSwitch;
+        public float value;
+        public InputTypes type;
     }
-    InputBitValues[] inputVariables = new InputBitValues[6];
-
-    enum Inputs : short
-    { /*  x     y    z  |   x      y     z    = Unity convention */
-        Pitch, Yaw, Roll,  Sway, Heave, Surge
-    }
-
-
+    InputValue[] inputValues = new InputValue[6];
 
     PlayerMovement()
     {
-        inputVariables[(int)Inputs.Pitch].bitPosition = 0b0000000000000011;
-        inputVariables[(int)Inputs.Yaw]  .bitPosition = 0b0000000000001100;
-        inputVariables[(int)Inputs.Roll] .bitPosition = 0b0000000000110000;
-        inputVariables[(int)Inputs.Sway] .bitPosition = 0b0000000011000000;
-        inputVariables[(int)Inputs.Heave].bitPosition = 0b0000001100000000;
-        inputVariables[(int)Inputs.Surge].bitPosition = 0b0000110000000000;
-
-        inputVariables[(int)Inputs.Pitch].bitSwitch = 0;
-        inputVariables[(int)Inputs.Yaw]  .bitSwitch = 2;
-        inputVariables[(int)Inputs.Roll] .bitSwitch = 4;
-        inputVariables[(int)Inputs.Sway] .bitSwitch = 6;
-        inputVariables[(int)Inputs.Heave].bitSwitch = 8;
-        inputVariables[(int)Inputs.Surge].bitSwitch = 10;
+        inputValues[(int)InputTypes.Pitch].type = InputTypes.Pitch;
+        inputValues[(int)InputTypes.Yaw]  .type = InputTypes.Yaw;
+        inputValues[(int)InputTypes.Roll] .type = InputTypes.Roll;
+        inputValues[(int)InputTypes.Sway] .type = InputTypes.Sway;
+        inputValues[(int)InputTypes.Heave].type = InputTypes.Heave;
+        inputValues[(int)InputTypes.Surge].type = InputTypes.Surge;
     }
 
     void Start()
@@ -84,38 +49,49 @@ public class PlayerMovement : NetworkBehaviour
     {
         if (IsLocalPlayer)
         {
-            inputVariables[(int)Inputs.Pitch].inputValue = inputActions.Gameplay.Pitch.ReadValue<float>();
-            inputVariables[(int)Inputs.Yaw]  .inputValue = inputActions.Gameplay.Yaw  .ReadValue<float>();
-            inputVariables[(int)Inputs.Roll] .inputValue = inputActions.Gameplay.Roll .ReadValue<float>();
-            inputVariables[(int)Inputs.Sway] .inputValue = inputActions.Gameplay.Sway .ReadValue<float>();
-            inputVariables[(int)Inputs.Heave].inputValue = inputActions.Gameplay.Heave.ReadValue<float>();
-            inputVariables[(int)Inputs.Surge].inputValue = inputActions.Gameplay.Surge.ReadValue<float>();
+            inputValues[(int)InputTypes.Pitch].value = inputActions.Gameplay.Pitch.ReadValue<float>();
+            inputValues[(int)InputTypes.Yaw]  .value = inputActions.Gameplay.Yaw  .ReadValue<float>();
+            inputValues[(int)InputTypes.Roll] .value = inputActions.Gameplay.Roll .ReadValue<float>();
+            inputValues[(int)InputTypes.Sway] .value = inputActions.Gameplay.Sway .ReadValue<float>();
+            inputValues[(int)InputTypes.Heave].value = inputActions.Gameplay.Heave.ReadValue<float>();
+            inputValues[(int)InputTypes.Surge].value = inputActions.Gameplay.Surge.ReadValue<float>();
 
-            inputBits = UpdateInputBits(inputBits, inputVariables);
-            Debug.Log("inputBits: "+Convert.ToString(inputBits, 2));
+            inputBits.Value = UpdateInputBits(inputBits.Value, inputValues);
+            Debug.Log("inputBits: " + Convert.ToString(inputBits.Value, 2));
 
             // result is inputBits of only the surgeBits moved to the rightmost position
-            var s = inputVariables[(int)Inputs.Surge];
-            Debug.Log("Final surgeBits: " + DecodeInputValue(inputBits, s.bitPosition, s.bitSwitch)); // 0b01 = 1, 0b11 = 3.
+            var s = inputValues[(int)InputTypes.Surge];
+            Debug.Log("Final surgeBits: " + GetInputBits(inputBits.Value, InputTypes.Surge)); // 0b01 = 1, 0b11 = 3.
         }
 
         // TODO: Remove the use of NetworkTransform on client?
         if (IsServer)
         {
             /*
-            // TODO: Clamp input value. It is currently client authorative
-            currentSurge = UpdateSpeedValue(currentSurge, surge.Value, acceleration, maxSpeed);
-            currentSway  = UpdateSpeedValue(currentSway,  sway.Value,  acceleration, maxSpeed);
-            currentHeave = UpdateSpeedValue(currentHeave, heave.Value, acceleration, maxHeave);
+            int surgeInput = DecodeInputBits(DecodeInputValue(inputBits.Value, InputBits.surgePos, InputBits.surgeSwitch));
+            currentSurge = UpdateSpeedValue(currentSurge, surgeInput, acceleration, maxSpeed);
+            transform.position += transform.forward * currentSurge;
+            //.... I can not just continue do these 3 steps that is super messy
+            */ 
+
+            for (int i = 0; i < inputValues.Length; i++)
+            {
+                var v = inputValues[i];
+                v.value = DecodeInputBits(GetInputBits(inputBits.Value, v.type));
+            }
+
+            // TODO: Make this cleaner
+            currentSurge = UpdateSpeedValue(currentSurge, inputValues[(int)InputTypes.Surge].value, acceleration, maxSpeed);
+            currentSway  = UpdateSpeedValue(currentSway,  inputValues[(int)InputTypes.Sway] .value, acceleration, maxSpeed);
+            currentHeave = UpdateSpeedValue(currentHeave, inputValues[(int)InputTypes.Heave].value, acceleration, maxHeave);
             transform.position += transform.forward * currentSurge;
             transform.position += transform.right   * currentSway;
             transform.position += transform.up      * currentHeave;
 
-            currentPitchSpeed = UpdateSpeedValue(currentPitchSpeed, pitch.Value, rotationSpeed, maxRotationSpeed);
-            currentYawSpeed   = UpdateSpeedValue(currentYawSpeed,   yaw.Value,   rotationSpeed, maxRotationSpeed);
-            currentRollSpeed  = UpdateSpeedValue(currentRollSpeed,  roll.Value,  rotationSpeed, maxRotationSpeed);
+            currentPitchSpeed = UpdateSpeedValue(currentPitchSpeed, inputValues[(int)InputTypes.Pitch].value, rotationSpeed, maxRotationSpeed);
+            currentYawSpeed   = UpdateSpeedValue(currentYawSpeed,   inputValues[(int)InputTypes.Yaw]  .value, rotationSpeed, maxRotationSpeed);
+            currentRollSpeed  = UpdateSpeedValue(currentRollSpeed,  inputValues[(int)InputTypes.Roll] .value, rotationSpeed, maxRotationSpeed);
             transform.Rotate(currentPitchSpeed, currentYawSpeed, currentRollSpeed * -1);
-            */
         }
     }
 
@@ -145,39 +121,54 @@ public class PlayerMovement : NetworkBehaviour
         return speed;
     }
 
-    static ushort UpdateInputBits(ushort InInputBits, InputBitValues[] InputBitValues)
+    static ushort UpdateInputBits(ushort InInputBits, InputValue[] InputBitValues)
     {
         int bitSet = InInputBits;
         byte b;
         foreach (var v in InputBitValues)
         {
-            b = noInput;
-            if (v.inputValue > 0)
-                b = positiveInput;
-            else if (v.inputValue < 0)
-                b = negativeInput;
-            bitSet &= ~v.bitPosition;
-            bitSet |= b << v.bitSwitch;
+            b = InputBits.nill;
+            if (v.value > 0)
+                b = InputBits.positive;
+            else if (v.value < 0)
+                b = InputBits.negative;
+            bitSet &= ~(InputBits.GetBitPosition(v.type));
+            bitSet |= b << (InputBits.GetBitSwitch(v.type));
         }
         return (ushort)bitSet; 
     }
+
     static ushort UpdateInputBits(ushort inInputBits, float inputValue, int bitPosition, int bitShift)
     {
         int bitSet = inInputBits;
-        byte b = noInput;
+        byte b = InputBits.nill;
         if (inputValue > 0)
-            b = positiveInput;
+            b = InputBits.positive;
         else if (inputValue < 0)
-            b = negativeInput;
+            b = InputBits.negative;
         bitSet &= ~bitPosition;  // Zero out the selected bits
         bitSet |= b << bitShift; // Move the bits into the correct position
 
         return (ushort)bitSet;
     }
 
-    static byte DecodeInputValue(int inputBits, int bitPosition, int bitShift)
+    // Returns the two bits for that specific input position
+    static byte GetInputBits(int inputBits, InputTypes type)
     {
+        int bitPosition = InputBits.GetBitPosition(type);
+        int bitShift = InputBits.GetBitSwitch(type);
         int i = (inputBits & bitPosition) >> bitShift;
         return (byte)i;
+    }
+
+    // Read the two bits and decode if its is positive, negative, or nil
+    static short DecodeInputBits(int bits)
+    {
+        if (bits == InputBits.positive)
+            return 1;
+        else if (bits == InputBits.negative)
+            return -1;
+
+        return 0;
     }
 }
