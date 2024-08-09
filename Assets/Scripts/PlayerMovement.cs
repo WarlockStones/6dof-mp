@@ -13,7 +13,6 @@ public class PlayerMovement : NetworkBehaviour
     NetworkVariable<float> pitch, roll, yaw, surge, heave, sway;
 
     IAC_Default inputActions;
-    Rigidbody rb;
     
     [SerializeField] private float maxSpeed = 0.5f;
     [SerializeField] private float maxHeave = 0.3f;
@@ -21,7 +20,11 @@ public class PlayerMovement : NetworkBehaviour
     [SerializeField] private float rotationSpeed = 0.1f;
     [SerializeField] private float maxRotationSpeed = 1.2f;
 
-    private int inputBits; // 16 bits to store the input values
+    private ushort inputBits; // 16 bits to store the input values
+    const int positiveInput  = 0b01; // Key is pressed
+    const int negativeInput  = 0b11; // Key reverse is pressed
+    const int noInput = 0b00; // Key is not pressed
+
     const int pitchBits = 0b0000000000000011;
     const int rollBits  = 0b0000000000001100;
     const int yawBits   = 0b0000000000110000;
@@ -48,15 +51,11 @@ public class PlayerMovement : NetworkBehaviour
 
     void Start()
     {
-        Debug.Log("Player spawned: "+OwnerClientId);
         if (IsLocalPlayer)
         {
-            Debug.Log("Is local player");
             inputActions = new IAC_Default();
             inputActions.Gameplay.Enable();
         }
-        else
-            Debug.Log("Not local player");
     }
 
     void FixedUpdate()
@@ -70,34 +69,15 @@ public class PlayerMovement : NetworkBehaviour
             heave.Value = inputActions.Gameplay.Heave.ReadValue<float>();
             sway.Value  = inputActions.Gameplay.Sway .ReadValue<float>();
 
-            // IT WORKS!
-            byte s = 0;
-            if (surge.Value > 0)
-                s = 0b01;
-            else if (surge.Value < 0)
-                s = 0b11;
-            inputBits &= ~surgeBits; // Zero out the bits
-            inputBits |= s << surgeSwitch; // Move value s to the correct position
-
-            byte p = 0;
-            if (pitch.Value > 0)
-                p = 0b01;
-            else if (pitch.Value < 0)
-                p = 0b11;
-            inputBits &= ~pitchBits;
-            inputBits |= p << pitchSwitch;
-
-            byte sw = 0;
-            if (sway.Value > 0)
-                sw = 0b01;
-            else if (sway.Value < 0)
-                sw = 0b11;
-            inputBits &= ~swayBits;
-            inputBits |= sw << swaySwitch;
+            inputBits = UpdateInputBits(inputBits, pitch.Value, pitchBits, pitchSwitch);
+            inputBits = UpdateInputBits(inputBits, roll.Value,  rollBits,  rollSwitch);
+            inputBits = UpdateInputBits(inputBits, yaw.Value,   yawBits,   yawSwitch);
+            inputBits = UpdateInputBits(inputBits, surge.Value, surgeBits, surgeSwitch);
+            inputBits = UpdateInputBits(inputBits, heave.Value, heaveBits, heaveSwitch);
+            inputBits = UpdateInputBits(inputBits, sway.Value,  swayBits,  swaySwitch);
             Debug.Log("inputBits: "+Convert.ToString(inputBits, 2));
 
-            // Reverse the process
-            // Is what is the sway value? 1 0 -1?
+            // result is inputBits of only the surgeBits moved to the rightmost position
             int result = (inputBits & surgeBits) >> surgeSwitch;
             Debug.Log("final surge is: " + Convert.ToString(result, 2));
         }
@@ -106,7 +86,6 @@ public class PlayerMovement : NetworkBehaviour
         if (IsServer)
         {
             // TODO: Clamp input value. It is currently client authorative
-
             currentSurge = UpdateSpeedValue(currentSurge, surge.Value, acceleration, maxSpeed);
             currentSway  = UpdateSpeedValue(currentSway,  sway.Value,  acceleration, maxSpeed);
             currentHeave = UpdateSpeedValue(currentHeave, heave.Value, acceleration, maxHeave);
@@ -145,5 +124,19 @@ public class PlayerMovement : NetworkBehaviour
         }
         
         return speed;
+    }
+
+    static ushort UpdateInputBits(ushort inInputBits, float inputValue, int bitPosition, int bitShift)
+    {
+        int bitSet = inInputBits;
+        byte b = noInput;
+        if (inputValue > 0)
+            b = positiveInput;
+        else if (inputValue < 0)
+            b = negativeInput;
+        bitSet &= ~bitPosition;  // Zero out the selected bits
+        bitSet |= b << bitShift; // Move the bits into the correct position
+
+        return (ushort)bitSet;
     }
 }
