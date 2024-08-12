@@ -18,17 +18,21 @@ public class Projectile : NetworkBehaviour
     }
 
     private float lifetimeRemaining = 1.5f;
+    // TODO: Is the movement of the projectile now client authorative?
     private void Update()
     {
-        transform.position += transform.forward * movementSpeed * Time.deltaTime;
+        if (IsServer)
+        {
+            transform.position += transform.forward * movementSpeed * Time.deltaTime;
 
-        if (lifetimeRemaining > 0)
-        {
-            lifetimeRemaining -= Time.deltaTime;
-        }
-        else
-        {
-            Die();
+            if (lifetimeRemaining > 0)
+            {
+                lifetimeRemaining -= Time.deltaTime;
+            }
+            else
+            {
+                Die();
+            }
         }
     }
 
@@ -41,9 +45,15 @@ public class Projectile : NetworkBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (isReady && other != null && other.transform.root != shooter)
+        if (IsServer && isReady && other != null && other.transform.root != shooter)
         {
             Debug.Log("Projectile hit: "+other.gameObject.name);
+            var health = other.transform.root.GetComponent<Health>();
+            if (health != null)
+            {
+                health.Hurt();
+            }
+
             Die();
         }
     }
