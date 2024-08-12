@@ -80,6 +80,15 @@ public partial class @IAC_Default: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""Shoot"",
+                    ""type"": ""Button"",
+                    ""id"": ""04d9ccd9-03ec-43e8-8887-31cf329bac09"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -280,6 +289,17 @@ public partial class @IAC_Default: IInputActionCollection2, IDisposable
                     ""action"": ""Yaw"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""4f18b33a-3710-428b-a93b-39d92d9ead78"",
+                    ""path"": ""<Keyboard>/space"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Shoot"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -300,6 +320,7 @@ public partial class @IAC_Default: IInputActionCollection2, IDisposable
         m_Gameplay_Surge = m_Gameplay.FindAction("Surge", throwIfNotFound: true);
         m_Gameplay_Heave = m_Gameplay.FindAction("Heave", throwIfNotFound: true);
         m_Gameplay_Sway = m_Gameplay.FindAction("Sway", throwIfNotFound: true);
+        m_Gameplay_Shoot = m_Gameplay.FindAction("Shoot", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -367,6 +388,7 @@ public partial class @IAC_Default: IInputActionCollection2, IDisposable
     private readonly InputAction m_Gameplay_Surge;
     private readonly InputAction m_Gameplay_Heave;
     private readonly InputAction m_Gameplay_Sway;
+    private readonly InputAction m_Gameplay_Shoot;
     public struct GameplayActions
     {
         private @IAC_Default m_Wrapper;
@@ -377,6 +399,7 @@ public partial class @IAC_Default: IInputActionCollection2, IDisposable
         public InputAction @Surge => m_Wrapper.m_Gameplay_Surge;
         public InputAction @Heave => m_Wrapper.m_Gameplay_Heave;
         public InputAction @Sway => m_Wrapper.m_Gameplay_Sway;
+        public InputAction @Shoot => m_Wrapper.m_Gameplay_Shoot;
         public InputActionMap Get() { return m_Wrapper.m_Gameplay; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -404,6 +427,9 @@ public partial class @IAC_Default: IInputActionCollection2, IDisposable
             @Sway.started += instance.OnSway;
             @Sway.performed += instance.OnSway;
             @Sway.canceled += instance.OnSway;
+            @Shoot.started += instance.OnShoot;
+            @Shoot.performed += instance.OnShoot;
+            @Shoot.canceled += instance.OnShoot;
         }
 
         private void UnregisterCallbacks(IGameplayActions instance)
@@ -426,6 +452,9 @@ public partial class @IAC_Default: IInputActionCollection2, IDisposable
             @Sway.started -= instance.OnSway;
             @Sway.performed -= instance.OnSway;
             @Sway.canceled -= instance.OnSway;
+            @Shoot.started -= instance.OnShoot;
+            @Shoot.performed -= instance.OnShoot;
+            @Shoot.canceled -= instance.OnShoot;
         }
 
         public void RemoveCallbacks(IGameplayActions instance)
@@ -460,5 +489,6 @@ public partial class @IAC_Default: IInputActionCollection2, IDisposable
         void OnSurge(InputAction.CallbackContext context);
         void OnHeave(InputAction.CallbackContext context);
         void OnSway(InputAction.CallbackContext context);
+        void OnShoot(InputAction.CallbackContext context);
     }
 }
