@@ -2,7 +2,6 @@ public enum InputType : byte
 { /*  x     y    z  |   x      y     z    = Unity convention */
     Pitch, Yaw, Roll,  Sway, Heave, Surge
 }
-
 public class Input
 {
     private enum InputBit : ushort

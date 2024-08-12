@@ -57,11 +57,17 @@ public class PlayerMovement : NetworkBehaviour
     static sbyte GetMovementFromInput(ushort bits, InputType inputType)
     {
         if ((bits & Input.GetPositiveBitPosition(inputType)) != 0)
+        {
             return 1;
+        }
         else if ((bits & Input.GetNegativeBitPosition(inputType)) != 0)
+        {
             return -1;
+        }
         else
+        {
             return 0;
+        }
     }
 
     private float currentSurge, currentHeave, currentSway, currentYawSpeed, currentPitchSpeed, currentRollSpeed;
@@ -69,6 +75,7 @@ public class PlayerMovement : NetworkBehaviour
     {
         float speed = inSpeed;
         float targetSpeed = inputValue * maxSpeed;
+
         if (speed < targetSpeed)
         {
             speed += inAccleration;
@@ -79,6 +86,7 @@ public class PlayerMovement : NetworkBehaviour
             speed -= inAccleration;
             Mathf.Clamp(speed, targetSpeed, inSpeed);
         }
+
         if (targetSpeed == 0)
         {
             if (speed < 0.01f && speed > -0.01f) // Do not move if float is almost zero
