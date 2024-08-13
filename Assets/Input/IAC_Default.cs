@@ -89,6 +89,15 @@ public partial class @IAC_Default: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Chat"",
+                    ""type"": ""Button"",
+                    ""id"": ""4c76a2b2-b95b-4635-b434-606eeb0a0f4c"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -300,6 +309,176 @@ public partial class @IAC_Default: IInputActionCollection2, IDisposable
                     ""action"": ""Shoot"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""77be3608-fb41-4b69-92cd-1b8e364268ea"",
+                    ""path"": ""<Keyboard>/v"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Chat"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
+        },
+        {
+            ""name"": ""Chat"",
+            ""id"": ""2a4ad3ee-3e88-4223-b1b2-08365ac6332c"",
+            ""actions"": [
+                {
+                    ""name"": ""H"",
+                    ""type"": ""Button"",
+                    ""id"": ""aba9156e-d2a1-4017-9604-30af9ba18cf5"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""S"",
+                    ""type"": ""Button"",
+                    ""id"": ""821fc7d9-e7e5-4913-a136-562df16adedc"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""W"",
+                    ""type"": ""Button"",
+                    ""id"": ""0362f9cc-8ce4-4a6c-b55d-4f1fe229f98c"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""I"",
+                    ""type"": ""Button"",
+                    ""id"": ""4737f010-b427-4d7d-b602-aecdb00a0f6d"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""N"",
+                    ""type"": ""Button"",
+                    ""id"": ""1ee0af2d-0dd5-4292-924b-3260e0a08d71"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""G"",
+                    ""type"": ""Button"",
+                    ""id"": ""1ded7df6-a9f7-4c38-bc3d-1550b210ce9a"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Quit"",
+                    ""type"": ""Button"",
+                    ""id"": ""e131969e-134b-4b02-8c5a-d5c7e2831156"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""d34fe6fa-2ac9-4c4a-b251-9906a2373e50"",
+                    ""path"": ""<Keyboard>/h"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""H"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""2a9f293a-1233-4261-81fc-8ef21ff8a7f1"",
+                    ""path"": ""<Keyboard>/s"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""S"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""654058b0-cea8-4e94-a075-5b6992702312"",
+                    ""path"": ""<Keyboard>/w"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""W"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""62f4ee12-e166-48df-b82d-4a6b93936d1e"",
+                    ""path"": ""<Keyboard>/i"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""I"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a618efa6-1b00-4291-af60-dce910bf3341"",
+                    ""path"": ""<Keyboard>/n"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""N"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""7017d170-0a29-4ba3-b592-a555bc19d4b9"",
+                    ""path"": ""<Keyboard>/g"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""G"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""c6715cc5-f54d-4661-9dcb-25fbb4ff3b26"",
+                    ""path"": ""<Keyboard>/v"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Quit"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""97bace8e-388f-4b6b-b32c-6552bbcee385"",
+                    ""path"": ""<Keyboard>/escape"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Quit"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -321,6 +500,16 @@ public partial class @IAC_Default: IInputActionCollection2, IDisposable
         m_Gameplay_Heave = m_Gameplay.FindAction("Heave", throwIfNotFound: true);
         m_Gameplay_Sway = m_Gameplay.FindAction("Sway", throwIfNotFound: true);
         m_Gameplay_Shoot = m_Gameplay.FindAction("Shoot", throwIfNotFound: true);
+        m_Gameplay_Chat = m_Gameplay.FindAction("Chat", throwIfNotFound: true);
+        // Chat
+        m_Chat = asset.FindActionMap("Chat", throwIfNotFound: true);
+        m_Chat_H = m_Chat.FindAction("H", throwIfNotFound: true);
+        m_Chat_S = m_Chat.FindAction("S", throwIfNotFound: true);
+        m_Chat_W = m_Chat.FindAction("W", throwIfNotFound: true);
+        m_Chat_I = m_Chat.FindAction("I", throwIfNotFound: true);
+        m_Chat_N = m_Chat.FindAction("N", throwIfNotFound: true);
+        m_Chat_G = m_Chat.FindAction("G", throwIfNotFound: true);
+        m_Chat_Quit = m_Chat.FindAction("Quit", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -389,6 +578,7 @@ public partial class @IAC_Default: IInputActionCollection2, IDisposable
     private readonly InputAction m_Gameplay_Heave;
     private readonly InputAction m_Gameplay_Sway;
     private readonly InputAction m_Gameplay_Shoot;
+    private readonly InputAction m_Gameplay_Chat;
     public struct GameplayActions
     {
         private @IAC_Default m_Wrapper;
@@ -400,6 +590,7 @@ public partial class @IAC_Default: IInputActionCollection2, IDisposable
         public InputAction @Heave => m_Wrapper.m_Gameplay_Heave;
         public InputAction @Sway => m_Wrapper.m_Gameplay_Sway;
         public InputAction @Shoot => m_Wrapper.m_Gameplay_Shoot;
+        public InputAction @Chat => m_Wrapper.m_Gameplay_Chat;
         public InputActionMap Get() { return m_Wrapper.m_Gameplay; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -430,6 +621,9 @@ public partial class @IAC_Default: IInputActionCollection2, IDisposable
             @Shoot.started += instance.OnShoot;
             @Shoot.performed += instance.OnShoot;
             @Shoot.canceled += instance.OnShoot;
+            @Chat.started += instance.OnChat;
+            @Chat.performed += instance.OnChat;
+            @Chat.canceled += instance.OnChat;
         }
 
         private void UnregisterCallbacks(IGameplayActions instance)
@@ -455,6 +649,9 @@ public partial class @IAC_Default: IInputActionCollection2, IDisposable
             @Shoot.started -= instance.OnShoot;
             @Shoot.performed -= instance.OnShoot;
             @Shoot.canceled -= instance.OnShoot;
+            @Chat.started -= instance.OnChat;
+            @Chat.performed -= instance.OnChat;
+            @Chat.canceled -= instance.OnChat;
         }
 
         public void RemoveCallbacks(IGameplayActions instance)
@@ -472,6 +669,100 @@ public partial class @IAC_Default: IInputActionCollection2, IDisposable
         }
     }
     public GameplayActions @Gameplay => new GameplayActions(this);
+
+    // Chat
+    private readonly InputActionMap m_Chat;
+    private List<IChatActions> m_ChatActionsCallbackInterfaces = new List<IChatActions>();
+    private readonly InputAction m_Chat_H;
+    private readonly InputAction m_Chat_S;
+    private readonly InputAction m_Chat_W;
+    private readonly InputAction m_Chat_I;
+    private readonly InputAction m_Chat_N;
+    private readonly InputAction m_Chat_G;
+    private readonly InputAction m_Chat_Quit;
+    public struct ChatActions
+    {
+        private @IAC_Default m_Wrapper;
+        public ChatActions(@IAC_Default wrapper) { m_Wrapper = wrapper; }
+        public InputAction @H => m_Wrapper.m_Chat_H;
+        public InputAction @S => m_Wrapper.m_Chat_S;
+        public InputAction @W => m_Wrapper.m_Chat_W;
+        public InputAction @I => m_Wrapper.m_Chat_I;
+        public InputAction @N => m_Wrapper.m_Chat_N;
+        public InputAction @G => m_Wrapper.m_Chat_G;
+        public InputAction @Quit => m_Wrapper.m_Chat_Quit;
+        public InputActionMap Get() { return m_Wrapper.m_Chat; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(ChatActions set) { return set.Get(); }
+        public void AddCallbacks(IChatActions instance)
+        {
+            if (instance == null || m_Wrapper.m_ChatActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_ChatActionsCallbackInterfaces.Add(instance);
+            @H.started += instance.OnH;
+            @H.performed += instance.OnH;
+            @H.canceled += instance.OnH;
+            @S.started += instance.OnS;
+            @S.performed += instance.OnS;
+            @S.canceled += instance.OnS;
+            @W.started += instance.OnW;
+            @W.performed += instance.OnW;
+            @W.canceled += instance.OnW;
+            @I.started += instance.OnI;
+            @I.performed += instance.OnI;
+            @I.canceled += instance.OnI;
+            @N.started += instance.OnN;
+            @N.performed += instance.OnN;
+            @N.canceled += instance.OnN;
+            @G.started += instance.OnG;
+            @G.performed += instance.OnG;
+            @G.canceled += instance.OnG;
+            @Quit.started += instance.OnQuit;
+            @Quit.performed += instance.OnQuit;
+            @Quit.canceled += instance.OnQuit;
+        }
+
+        private void UnregisterCallbacks(IChatActions instance)
+        {
+            @H.started -= instance.OnH;
+            @H.performed -= instance.OnH;
+            @H.canceled -= instance.OnH;
+            @S.started -= instance.OnS;
+            @S.performed -= instance.OnS;
+            @S.canceled -= instance.OnS;
+            @W.started -= instance.OnW;
+            @W.performed -= instance.OnW;
+            @W.canceled -= instance.OnW;
+            @I.started -= instance.OnI;
+            @I.performed -= instance.OnI;
+            @I.canceled -= instance.OnI;
+            @N.started -= instance.OnN;
+            @N.performed -= instance.OnN;
+            @N.canceled -= instance.OnN;
+            @G.started -= instance.OnG;
+            @G.performed -= instance.OnG;
+            @G.canceled -= instance.OnG;
+            @Quit.started -= instance.OnQuit;
+            @Quit.performed -= instance.OnQuit;
+            @Quit.canceled -= instance.OnQuit;
+        }
+
+        public void RemoveCallbacks(IChatActions instance)
+        {
+            if (m_Wrapper.m_ChatActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        public void SetCallbacks(IChatActions instance)
+        {
+            foreach (var item in m_Wrapper.m_ChatActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_ChatActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    public ChatActions @Chat => new ChatActions(this);
     private int m_DefaultSchemeIndex = -1;
     public InputControlScheme DefaultScheme
     {
@@ -490,5 +781,16 @@ public partial class @IAC_Default: IInputActionCollection2, IDisposable
         void OnHeave(InputAction.CallbackContext context);
         void OnSway(InputAction.CallbackContext context);
         void OnShoot(InputAction.CallbackContext context);
+        void OnChat(InputAction.CallbackContext context);
+    }
+    public interface IChatActions
+    {
+        void OnH(InputAction.CallbackContext context);
+        void OnS(InputAction.CallbackContext context);
+        void OnW(InputAction.CallbackContext context);
+        void OnI(InputAction.CallbackContext context);
+        void OnN(InputAction.CallbackContext context);
+        void OnG(InputAction.CallbackContext context);
+        void OnQuit(InputAction.CallbackContext context);
     }
 }

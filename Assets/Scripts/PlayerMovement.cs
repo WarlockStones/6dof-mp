@@ -3,13 +3,13 @@ using UnityEngine;
 
 public class PlayerMovement : NetworkBehaviour
 {
-    IAC_Default inputActions;
-
     [SerializeField] private float maxSpeed = 0.5f;
     [SerializeField] private float maxHeave = 0.3f;
     [SerializeField] private float acceleration = 0.01f;
     [SerializeField] private float rotationSpeed = 0.1f;
     [SerializeField] private float maxRotationSpeed = 1.2f;
+
+    IAC_Default inputActions;
 
     // 16bits to store all input values
     NetworkVariable<ushort> inputBits = new NetworkVariable<ushort>(writePerm: NetworkVariableWritePermission.Owner);
