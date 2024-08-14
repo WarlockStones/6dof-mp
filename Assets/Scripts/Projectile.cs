@@ -7,9 +7,8 @@ public class Projectile : NetworkBehaviour
     [SerializeField]
     float movementSpeed = 200;
 
-    bool isReady = false;
-
     Transform shooter;
+    ulong shooterID;
     NetworkObject networkObject;
 
     void Awake()
@@ -18,40 +17,36 @@ public class Projectile : NetworkBehaviour
     }
 
     private float lifetimeRemaining = 1.5f;
-    // TODO: Is the movement of the projectile now client authorative?
     private void Update()
     {
-        if (IsServer)
-        {
-            transform.position += transform.forward * movementSpeed * Time.deltaTime;
+        transform.position += transform.forward * movementSpeed * Time.deltaTime;
 
-            if (lifetimeRemaining > 0)
-            {
-                lifetimeRemaining -= Time.deltaTime;
-            }
-            else
-            {
-                Die();
-            }
+        if (lifetimeRemaining > 0)
+        {
+            lifetimeRemaining -= Time.deltaTime;
+        }
+        else
+        {
+            Die();
         }
     }
 
-    public void SetupProjectile(Transform inShooter, Vector3 MovementAdjustment)
+    public void SetupProjectile(Transform inShooter, ulong inShooterID, Vector3 MovementAdjustment)
     {
         shooter = inShooter;
-        isReady = true;
+        shooterID = inShooterID;
         networkObject.Spawn();
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (IsServer && isReady && other != null && other.transform.root != shooter)
+        if (IsServer && other != null && other.transform.root != shooter)
         {
             Debug.Log("Projectile hit: "+other.gameObject.name);
             var health = other.transform.root.GetComponent<Health>();
             if (health != null)
             {
-                health.Hurt();
+                health.Hurt(shooterID);
             }
 
             Die();
@@ -60,7 +55,6 @@ public class Projectile : NetworkBehaviour
 
     private void Die()
     {
-
         if (networkObject.IsSpawned)
         {
             networkObject.Despawn();

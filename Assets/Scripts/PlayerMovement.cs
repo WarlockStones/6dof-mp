@@ -33,11 +33,8 @@ public class PlayerMovement : NetworkBehaviour
             inputBits.Value = UpdateInputBits(inputBits.Value, InputType.Sway,  inputActions.Gameplay.Sway .ReadValue<float>());
             inputBits.Value = UpdateInputBits(inputBits.Value, InputType.Heave, inputActions.Gameplay.Heave.ReadValue<float>());
             inputBits.Value = UpdateInputBits(inputBits.Value, InputType.Surge, inputActions.Gameplay.Surge.ReadValue<float>());
-
-            // Debug.Log("inputBits: " + Convert.ToString(inputBits.Value, 2));
         }
 
-        // TODO: Remove the use of NetworkTransform on client?
         if (IsServer)
         {
             currentSurge = UpdateSpeedValue(currentSurge, GetMovementFromInput(inputBits.Value, InputType.Surge), acceleration, maxSpeed);

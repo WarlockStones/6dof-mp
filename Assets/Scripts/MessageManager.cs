@@ -71,7 +71,6 @@ public class MessageManager : NetworkBehaviour
             inputActions.Gameplay.Enable();
             inputActions.Chat.Disable();
             isChatMode = false;
-
         }
     }
 
@@ -150,7 +149,7 @@ public class MessageManager : NetworkBehaviour
 
     const int maxMessages = 10;
     Queue chatMessages = new Queue(maxMessages);
-    void AddMessageToTextBox(string msg)
+    void AddMessageToTextBox(string msg) // Placeholder chat box function
     {
         if (chatMessages.Count == maxMessages)
         {

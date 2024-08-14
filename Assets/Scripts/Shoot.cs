@@ -15,7 +15,7 @@ public class Shoot : NetworkBehaviour
         {
             inputActions = new IAC_Default();
             inputActions.Gameplay.Enable();
-            inputActions.Gameplay.Shoot.performed += context => FireRPC();
+            inputActions.Gameplay.Shoot.performed += context => FireRPC(OwnerClientId);
         }
     }
 
@@ -32,12 +32,12 @@ public class Shoot : NetworkBehaviour
     float fireTimer;
     // RPC
     [Rpc(SendTo.Server)]
-    void FireRPC()
+    void FireRPC(ulong shooterID)
     {
         if (fireTimer <= 0)
         {
             GameObject go = Instantiate(projectilePrefab, transform.position, transform.rotation);
-            go.GetComponent<Projectile>().SetupProjectile(transform, new Vector3(0, 0, 0));
+            go.GetComponent<Projectile>().SetupProjectile(transform, shooterID, new Vector3(0, 0, 0));
             fireTimer = fireCooldownsInSeconds;
         }
     }
